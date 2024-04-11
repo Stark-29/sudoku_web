@@ -16,7 +16,7 @@ This project implements a Sudoku game using HTML, CSS, and JavaScript. It includ
 ### How to Play
 -----------
 
-1.  Select a difficulty level (easy, medium, or hard).
+1.  Select a difficulty level (easy, medium, hard or expert).
 2.  Use the pencil tool to enable pencil mode and enter possible candidate numbers.
 3.  Use the candidate tool to enable or disable candidate pencil mode.
 4.  Click on cells to select them and enter numbers using the keyboard or by clicking on the digit buttons.
