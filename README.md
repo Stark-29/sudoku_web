@@ -25,13 +25,13 @@ This project implements a Sudoku game using HTML, CSS, and JavaScript. It includ
 7.  Once you've filled in all the cells correctly, you win the game!
 
 ### Technologies Used
-
+-----------
 - HTML
 - CSS
 - JavaScript
 
 ### Future Enhancements
-
+-----------
 Some features that could be added in the future include:
 
 - Support for custom Sudoku puzzles.
@@ -39,12 +39,12 @@ Some features that could be added in the future include:
 - Integration with back-end services for saving game progress.
 
 Demo
-----
+-----------
 
 [Link to Live Demo](#)
 
 License
--------
+-----------
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
