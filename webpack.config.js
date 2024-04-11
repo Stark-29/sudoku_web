@@ -1,5 +1,6 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 module.exports = {
   mode: "development",
@@ -35,6 +36,12 @@ module.exports = {
       template: "./public/index.html", // Ruta al archivo HTML de tu carpeta public
       filename: "index.html", // Nombre del archivo HTML generado
       inject: "head", // Inyectar los scripts al final del body
+    }),
+    new CopyWebpackPlugin({
+      patterns: [
+        { from: "public/styles.css", to: "styles.css" },
+        { from: "public/assets", to: "assets" },
+      ],
     }),
   ],
 };
