@@ -41,7 +41,7 @@ Some features that could be added in the future include:
 Demo
 -----------
 
-[Link to Live Demo](https://stark-29.github.io/sudoku_web/)
+<a href="https://stark-29.github.io/sudoku_web/" target="_blank">Link to Live Demo</a>
 
 License
 -----------
