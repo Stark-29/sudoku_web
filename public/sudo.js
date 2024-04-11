@@ -39,8 +39,8 @@ document.addEventListener("DOMContentLoaded", function () {
     } else {
       // Si el lápiz está desactivado, elimina todos los candidatos
       document
-        .querySelectorAll(".candidate")
-        .forEach((candidate) => candidate.remove());
+        .querySelectorAll(".grid-container")
+        .forEach((gridContainer) => gridContainer.remove());
       // Restaura el color original del texto del span
       spanElement.style.color = originalColor;
     }
