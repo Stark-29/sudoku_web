@@ -1,0 +1,367 @@
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  text-align: center;
+  background-color: #222; /* Color de fondo típico del modo oscuro */
+  color: #ffffff; /* Color del texto */
+}
+h2 {
+  font-size: 24px; /* Tamaño de fuente */
+  font-weight: bold; /* Peso de la fuente */
+  margin: 0; /* Elimina el margen exterior */
+  color: #fff;
+}
+
+/* Estilo para p */
+p {
+  margin-top: 10px; /* Elimina el margen exterior */
+  font-weight: 300;
+}
+
+span {
+  font-size: 12px;
+  color: #aaaaaa; /* Elimina el margen exterior */
+}
+
+/* Estilos del modal */
+.modal {
+  display: flex;
+  align-items: center; /* Centrar verticalmente */
+  justify-content: center; /* Centrar horizontalmente */
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0; /* Puedes cambiar este valor al 50% si deseas */
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 2;
+}
+.modal-content {
+  background-color: #2f2f2f;
+  color: #ffffff; /* Color del texto */
+  margin: 20vh auto; /* Centrar horizontalmente */
+  padding: 20px;
+  border-radius: 10px;
+  width: 350px; /* Ajustado al nuevo ancho del tablero */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.dialog-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+.dialog-box {
+  position: absolute; /* Cambiar a posición absoluta */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgb(43 48 55);
+  padding: 20px;
+  border: 2px solid rgb(66 109 172);
+  border-radius: 5px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+  z-index: 2;
+  width: 180px;
+}
+
+.congratulations-text,
+.game-over-text {
+  font-size: 18px; /* Tamaño de fuente reducido */
+  margin-bottom: 10px;
+}
+
+.new-game-button,
+.restart-button {
+  padding: 8px 16px; /* Reducción del tamaño de los botones */
+  background-color: rgb(66 109 172);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  display: inline-block; /* Agregar esta propiedad para que los botones estén uno al lado del otro */
+  margin-top: 12px; /* Agregar margen derecho para separar los botones */
+  width: 100px;
+}
+
+.restart-button:hover {
+  background-color: rgb(66, 154, 218);
+}
+
+.difficulty-options {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px; /* Espacio entre el contenido y los botones */
+}
+
+.difficulty-btn {
+  margin: 0 10px; /* Espacio entre los botones */
+  padding: 8px 14px; /* Reducción del tamaño de los botones */
+  font-size: 14px; /* Tamaño de fuente reducido */
+  font-weight: bold;
+  color: #fff; /* Color del texto */
+  background-color: rgb(66 109 172); /* Color de fondo */
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease; /* Transición suave al pasar el ratón */
+}
+
+.difficulty-btn:hover {
+  background-color: rgb(66, 154, 218); /* Color de fondo al pasar el ratón */
+}
+
+#info-container {
+  display: flex;
+  justify-content: space-between;
+  width: 380px; /* Nuevo ancho del contenedor */
+  margin: 10px auto;
+  text-align: left;
+  user-select: none;
+}
+
+#errors,
+#difficulty,
+#timer {
+  flex: 1;
+  color: #ffffff; /* Azul claro */
+  font-size: 12px; /* Tamaño de fuente reducido */
+  font-weight: bold;
+}
+
+#difficulty {
+  text-align: center;
+}
+
+#timer {
+  text-align: right;
+}
+
+#board {
+  position: relative;
+  width: 380px;
+  height: 380px;
+  margin: 5px auto;
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  grid-template-rows: repeat(9, 1fr);
+  /*background-color: #383838;*/
+  /*background-color: #273444;*/
+  background-color: #273444ba;
+  border: 3px solid rgb(0, 0, 0);
+}
+
+.tile-container {
+  display: flex;
+  justify-content: center; /* Centrar horizontalmente */
+  align-items: center; /* Centrar verticalmente */
+}
+
+.tile {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tile-start {
+  font-size: 22px;
+  color: #fff;
+}
+
+.grid-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 41.22px;
+  height: 41.22px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* Tres columnas automáticas */
+  grid-template-rows: repeat(3, 1fr); /* Altura automática de las filas */
+}
+
+.candidate {
+  font-size: 10px;
+  width: 100%; /* Ancho del candidato igual al ancho del grid-container */
+  height: 100%; /* Altura del candidato igual al alto del grid-container */
+}
+.highlighted-candidate {
+  background-color: rgb(64, 89, 126);
+  color: #ffffff;
+}
+
+#digits {
+  width: 380px;
+  height: 60px;
+  margin: 10px auto; /* Ajuste de margen */
+  display: flex;
+  justify-content: center; /* Centrar horizontalmente */
+  cursor: pointer;
+}
+
+.number {
+  position: relative; /* Establecer el posicionamiento relativo */
+  width: 35px;
+  height: 65px;
+  margin: 3px;
+  font-size: 36px;
+  color: #2f7bda; /* Color del texto */
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  align-items: center;
+  line-height: normal;
+  cursor: pointer; /* Cambiar cursor al pasar por encima */
+  margin-top: 10px;
+}
+
+.number:hover {
+  transform: scale(1.2); /* prettier-ignore */
+  transition: transform 0.3s ease; /* Agregar una transición de transformación */
+}
+
+.unavailable {
+  visibility: hidden;
+  color: #00000000;
+  background-color: #00000000;
+  opacity: 0;
+}
+
+#remaining-container {
+  width: 380px;
+  height: 0px;
+  margin: 0px auto; /* Ajuste de margen */
+  display: flex;
+  justify-content: center; /* Centrar horizontalmente */
+  align-items: center;
+  cursor: pointer;
+}
+
+.remaining {
+  position: relative; /* Establecer el posicionamiento absoluto */
+  top: -15px;
+  font-size: 12px;
+  align-items: center;
+  color: #fff;
+  font-weight: bold;
+  width: 35px;
+  height: 0px;
+  margin: 3px;
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  align-items: center;
+}
+
+.user-input {
+  color: #2f7bda; /* Cambiar el color del texto a azul para números agregados por el usuario */
+  font-weight: bold;
+  font-size: 22px;
+}
+
+#tools {
+  width: 380px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* Alinea los elementos en la parte superior */
+  flex-direction: row; /* Asegura que los elementos se coloquen en una fila */
+  margin: 10px auto; /* Ajuste de margen */
+  user-select: none;
+}
+
+.tool {
+  font-size: 14px;
+  text-align: center;
+  width: calc(100% / 3); /* Dividir el ancho en tres partes iguales */
+  display: flex;
+  flex-direction: column; /* Alinea los elementos en una columna */
+  align-items: center; /* Centra los elementos horizontalmente */
+}
+
+.tool img {
+  width: 40px;
+  height: 30px;
+  margin-bottom: 3px;
+  cursor: pointer;
+}
+
+.tool img:hover {
+  filter: brightness(125%);
+  transition: filter 0.3s ease;
+}
+
+.tool img.pressed {
+  filter: brightness(140%);
+  transform: scale(1.1);
+  transition: transform 0.3s ease;
+}
+
+.tool img.bulb-pressed {
+  transform: scale(1.2); /* prettier-ignore */
+  transition: transform 0.3s ease; /* Agregar una transición de transformación */
+}
+
+.horizontal-line::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 3px;
+  background-color: rgb(0, 0, 0);
+  z-index: 1;
+}
+
+.vertical-line::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 3px;
+  height: 100%;
+  background-color: rgb(0, 0, 0);
+}
+
+.horizontal-grid {
+  border-bottom: 1px solid rgb(0, 0, 0);
+}
+.vertical-grid {
+  border-right: 1px solid rgb(0, 0, 0);
+}
+
+.empty-cell-highlight {
+  background-color: rgb(64, 89, 126);
+}
+
+.highlighted-empty {
+  background-color: rgb(64, 89, 126);
+}
+
+.tile.highlighted {
+  background-color: rgb(64, 89, 126);
+}
+
+#digits,
+#board,
+#remaining-container {
+  user-select: none;
+}
+
+.highlighted-square {
+  background-color: rgb(0 0 0 / 25%);
+}
+
+/* Resaltar las líneas verticales y horizontales */
+.highlighted-line {
+  background-color: rgb(0 0 0 / 25%);
+}
