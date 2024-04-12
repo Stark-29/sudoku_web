@@ -91,7 +91,7 @@ span {
   margin-top: 12px; /* Agregar margen derecho para separar los botones */
   width: 100px;
 }
-
+.new-game-button:hover,
 .restart-button:hover {
   background-color: rgb(66, 154, 218);
 }
