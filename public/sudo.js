@@ -7,6 +7,7 @@ let initialRemainingNumbers = null;
 // Variable para controlar si los números restantes ya han sido calculados
 let selectedCell = null;
 let nestedPuzzle = [];
+let nestedSolution = [];
 let IsOver = false;
 let pencilPressed = false;
 let candiPressed = false;
@@ -256,6 +257,7 @@ function insertCandidatesIntoTiles(allCandidates) {
           }
         });
       } else {
+        console.log("se ejecuto el sida de que tiene user-input");
         tile.innerHTML = ""; // Limpiar el contenido existente del tile
         // Si no existe un grid-container o no tiene la clase user-modified, crear uno nuevo
         gridContainer = document.createElement("div");
@@ -406,42 +408,49 @@ function calculateInitialRemainingNumbers(nestedPuzzle) {
 
 // region SETGAME
 // Función para iniciar el juego con la dificultad seleccionada
-function setGame() {
+function setGame(predefinedPuzzle, predefinedSolution) {
   // Reiniciar los contadores de los números
   numSelected = null;
   clearGame();
   startTimer();
   resetNumberCounters();
 
-  // Generar un nuevo sudoku usando sudoku-gen con la dificultad seleccionada
-  const { puzzle: originalPuzzle, solution: solvedPuzzle } =
-    getSudoku(difficulty);
+  if (predefinedPuzzle && predefinedSolution) {
+    // Utilizar los valores predefinidos si se proporcionan
+    nestedPuzzle = predefinedPuzzle;
+    nestedSolution = predefinedSolution;
+    currentSudokuState = JSON.parse(JSON.stringify(nestedPuzzle));
+  } else {
+    // Generar un nuevo sudoku usando sudoku-gen con la dificultad seleccionada
+    const { puzzle: originalPuzzle, solution: solvedPuzzle } =
+      getSudoku(difficulty);
 
-  console.log("Sudoku generado:", originalPuzzle); // Mensaje de depuración para el sudoku generado
-  nestedPuzzle = [];
-  // Convierte el sudoku en formato de matriz para su uso en el juego
-  for (let i = 0; i < 9; i++) {
-    nestedPuzzle.push(
-      originalPuzzle
-        .substring(i * 9, (i + 1) * 9)
-        .split("")
-        .map((cell) => (cell === "-" ? 0 : parseInt(cell)))
-    );
-  }
-  // Limpia el estado actual del sudoku al inicio del juego
-  currentSudokuState = JSON.parse(JSON.stringify(nestedPuzzle));
-  // Crear los divs de los números restantes solo si no se han calculado previamente
-  initialRemainingNumbers = calculateInitialRemainingNumbers(nestedPuzzle);
-  createInitialRemainingDivs();
+    console.log("Sudoku generado:", originalPuzzle); // Mensaje de depuración para el sudoku generado
+    nestedPuzzle = [];
+    // Convierte el sudoku en formato de matriz para su uso en el juego
+    for (let i = 0; i < 9; i++) {
+      nestedPuzzle.push(
+        originalPuzzle
+          .substring(i * 9, (i + 1) * 9)
+          .split("")
+          .map((cell) => (cell === "-" ? 0 : parseInt(cell)))
+      );
+    }
+    // Limpia el estado actual del sudoku al inicio del juego
+    currentSudokuState = JSON.parse(JSON.stringify(nestedPuzzle));
+    // Crear los divs de los números restantes solo si no se han calculado previamente
+    initialRemainingNumbers = calculateInitialRemainingNumbers(nestedPuzzle);
+    createInitialRemainingDivs();
 
-  var nestedSolution = [];
-  for (let i = 0; i < 9; i++) {
-    nestedSolution.push(
-      solvedPuzzle
-        .substring(i * 9, (i + 1) * 9)
-        .split("")
-        .map((cell) => (cell === "-" ? 0 : parseInt(cell)))
-    );
+    nestedSolution = [];
+    for (let i = 0; i < 9; i++) {
+      nestedSolution.push(
+        solvedPuzzle
+          .substring(i * 9, (i + 1) * 9)
+          .split("")
+          .map((cell) => (cell === "-" ? 0 : parseInt(cell)))
+      );
+    }
   }
 
   console.log("Sudoku resuelto:", nestedSolution);
@@ -917,7 +926,7 @@ function gameOver() {
     //document.getElementById("timer").innerText = "00:00"; // Reiniciar el temporizador
     stopTimer(); // Detener el temporizador si está en marcha
     clearHighlights();
-    replayGame(); // Volver a cargar el mismo sudoku
+    replayGame(nestedPuzzle, nestedSolution); // Volver a cargar el mismo sudoku
     dialogBox.remove(); // Ocultar ventana de diálogo
     dialogContainer.remove();
   });
@@ -927,55 +936,27 @@ function gameOver() {
   boardContainer.appendChild(dialogBox);
 }
 
-function replayGame() {
-  // Limpiar todos los user-inputs del tablero
-  const userInputNumbers = document.querySelectorAll(".tile.user-input");
-  userInputNumbers.forEach((number) => {
-    number.innerText = ""; // Limpiar el número
-    number.classList.remove("user-input"); // Eliminar la clase user-input
-  });
-
-  const tiles = document.querySelectorAll(".tile");
-
-  const containers = document.querySelectorAll(".grid-container");
-
-  containers.forEach((container) => {
-    container.innerText = "";
-  });
-
-  numSelected = null;
-  resetNumberCounters();
-
-  const digitsContainer = document.getElementById("digits");
-  digitsContainer.style.cursor = "default";
-  const digitNumbers = document.querySelectorAll("#digits > div");
-  const remainingNumbers = document.querySelectorAll(
-    "#remaining-container > div"
-  );
-
-  // Agregar la clase "unavailable" a cada número del div digits
-  digitNumbers.forEach((number) => {
-    number.classList.remove("unavailable");
-    number.style.cursor = "cursor";
-  });
-  remainingNumbers.forEach((element) => {
-    element.classList.remove("unavailable");
-  });
-
-  document.getElementById("timer").innerText = "00:00"; // Reiniciar el temporizador
+function replayGame(predefinedPuzzle, predefinedSolution) {
+  // Reiniciar el juego
   errors = 0;
   IsOver = false;
+  pencilPressed = false;
+  currentSudokuState = [];
+  nestedPuzzle = predefinedPuzzle;
+  nestedSolution = predefinedSolution;
   document.getElementById("errors").innerText = "Mistakes: 0/3";
   // Restablecer estado del lápiz rápido y restaurar el color original del texto del span
-  pencilPressed = false;
+
+  // Eliminar la clase "pressed" de todas las imágenes
+  document.querySelectorAll("img.pressed").forEach((img) => {
+    img.classList.remove("pressed");
+  });
+
   document.querySelectorAll("span").forEach((span) => {
     span.style.color = ""; // Restablecer color original
   });
-  startTimer();
-  // Volver a agregar el listener de eventos de clic a cada tile
-  tiles.forEach((tile) => {
-    tile.addEventListener("click", selectTile);
-  });
+  clearGame(); // Limpiar el tablero anterior y la interfaz de usuario
+  setGame(predefinedPuzzle, predefinedSolution); // Configurar un nuevo juego
 }
 
 function restartGame() {
