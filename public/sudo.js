@@ -18,87 +18,105 @@ let numberCount = new Array(9).fill(0); //Contador numeros tablero
 let difficulty = "easy";
 
 // Función para obtener los candidatos de todas las celdas vacías en un tablero de sudoku
-document.addEventListener("DOMContentLoaded", function () {
+var pencilTool = document.querySelector(".tool:first-child img");
+pencilTool.addEventListener("click", function () {
   // Selecciona el elemento que contiene la imagen del lápiz rápido
-  var pencilTool = document.querySelector(".tool:first-child");
-  var spanElement = pencilTool.parentElement.querySelector("span");
 
+  var spanElement = pencilTool.parentElement.querySelector("span");
   // Guarda el color original del texto del span
-  var originalColor = window.getComputedStyle(spanElement).color;
+  spanElement.style.color = "#2f7bda";
 
   // Agrega un controlador de eventos de clic al elemento del lápiz rápido
-  pencilTool.addEventListener("click", function () {
-    // Llama a la función que calcula los candidatos para todas las celdas vacías
-    pencilPressed = !pencilPressed;
+  // Llama a la función que calcula los candidatos para todas las celdas vacías
+  pencilPressed = !pencilPressed;
 
-    if (pencilPressed) {
-      // Si el lápiz está activado, muestra los candidatos
-      const allCandidates = getAllCandidates(currentSudokuState);
-      insertCandidatesIntoTiles(allCandidates);
-      // Cambia el color del texto del span cuando se presiona el botón
-      spanElement.style.color = "#2f7bda";
-    } else {
-      // Si el lápiz está desactivado, elimina todos los candidatos
-      document
-        .querySelectorAll(".grid-container")
-        .forEach((gridContainer) => gridContainer.remove());
-      // Restaura el color original del texto del span
-      spanElement.style.color = originalColor;
-    }
-  });
+  if (pencilPressed) {
+    // Si el lápiz está activado, muestra los candidatos
+    const allCandidates = getAllCandidates(currentSudokuState);
+    insertCandidatesIntoTiles(allCandidates);
+    // Cambia el color del texto del span cuando se presiona el botón
+    pencilTool.classList.toggle("pressed");
+  } else {
+    // Si el lápiz está desactivado, elimina todos los candidatos
+    document
+      .querySelectorAll(".grid-container")
+      .forEach((gridContainer) => gridContainer.remove());
+    // Restaura el color original del texto del span
+    spanElement.style.color = "#aaaaaa";
+    pencilTool.classList.remove("pressed");
+  }
 });
 
 // Función para agregar los candidatos a las celdas manualmente por el usuario
-document.addEventListener("DOMContentLoaded", function () {
+var candidateTool = document.querySelectorAll(".tool")[1].querySelector("img");
+
+candidateTool.addEventListener("click", function () {
   // Selecciona el elemento que contiene la imagen del lápiz de candidatos
-  var candidateTool = document.querySelectorAll(".tool")[1];
-  var spanElement = candidateTool.querySelector("span");
-
-  // Guarda el color original del texto del span
-  var originalColor = window.getComputedStyle(spanElement).color;
-
+  var spanElement = candidateTool.nextElementSibling;
   // Agrega un controlador de eventos de clic al elemento del lápiz de candidatos
-  candidateTool.addEventListener("click", function () {
-    // Cambia el estado del lápiz de candidatos
-    candiPressed = !candiPressed;
-
-    if (candiPressed) {
-      // Si el lápiz de candidatos está activado, permite agregar y editar candidatos
-      console.log("Lápiz de candidatos activado");
-      // Cambia el color del texto del span cuando se presiona el botón
-      spanElement.style.color = "#2f7bda";
-    } else {
-      // Si el lápiz de candidatos está desactivado, elimina todos los candidatos agregados manualmente
-      console.log("Lápiz de candidatos desactivado");
-      spanElement.style.color = originalColor;
-    }
-  });
+  // Cambia el estado del lápiz de candidatos
+  candiPressed = !candiPressed;
+  if (candiPressed) {
+    // Si el lápiz de candidatos está activado, permite agregar y editar candidatos
+    console.log("Lápiz de candidatos activado");
+    // Cambia el color del texto del span cuando se presiona el botón
+    candidateTool.classList.toggle("pressed");
+    spanElement.style.color = "#2f7bda";
+  } else {
+    // Si el lápiz de candidatos está desactivado, elimina todos los candidatos agregados manualmente
+    console.log("Lápiz de candidatos desactivado");
+    spanElement.style.color = "#aaaaaa";
+    candidateTool.classList.remove("pressed");
+  }
 });
 
-// Función para manejar la introducción de candidatos en un tile
-function insertCandidate(tile, candidate) {
-  // Verificar si el tile es editable (no es user-input ni tile-start)
-  if (
-    !tile.classList.contains("user-input") &&
-    !tile.classList.contains("tile-start")
-  ) {
-    // Verificar si el candidato ya está presente en el tile
-    const existingCandidate = tile.querySelector(
-      `.candidate[data-value='${candidate}']`
-    );
-    if (!existingCandidate) {
-      // Si el candidato no está presente, agregarlo al tile
-      const candidateElement = document.createElement("span");
-      candidateElement.textContent = candidate;
-      candidateElement.classList.add("candidate");
-      candidateElement.dataset.value = candidate;
-      tile.appendChild(candidateElement);
-    } else {
-      // Si el candidato ya está presente, eliminarlo del tile
-      existingCandidate.remove();
+//region bulbPista
+// Obtener la herramienta de Pista (bulb)
+var bulbTool = document.querySelector(".tool:nth-child(3) img.pista-image");
+
+// Agregar un controlador de eventos de clic a la imagen de Pista (bulb)
+bulbTool.addEventListener("click", function () {
+  // Si la imagen ya está presionada, quitar la clase; de lo contrario, agregarla
+  // Agregar temporalmente la clase "bulb-pressed" solo si es la imagen de la herramienta de Pista (bulb)
+  bulbTool.classList.add("bulb-pressed");
+
+  // Esperar un tiempo corto y luego quitar la clase para desactivar la animación
+  setTimeout(function () {
+    bulbTool.classList.remove("bulb-pressed");
+  }, 300); // Ajusta el tiempo según la duración de tu animación CSS
+
+  if (selectedCell) {
+    const { row, col } = selectedCell;
+    const tile = document.getElementById(`${row}-${col}`);
+    if (
+      tile &&
+      !tile.classList.contains("user-input") &&
+      !tile.classList.contains("tile-start")
+    ) {
+      // Limpiar el contenido de la celda
+      tile.innerHTML = "";
+
+      // Verificar si el número de la solución en las coordenadas de la celda seleccionada es diferente de 0
+      const solutionNumber = solution[row][col];
+      if (solutionNumber !== 0) {
+        // Agregar el número directamente al div principal de la celda
+        tile.innerText = solutionNumber;
+        tile.classList.add("user-input"); // Marcar como número agregado por pista
+        tile.classList.add("pista");
+        numberCount[solutionNumber - 1]++;
+        // Recalcular los candidatos si pencilPressed está en true
+        currentSudokuState[row][col] = solutionNumber;
+        if (pencilPressed) {
+          const allCandidates = getAllCandidates(currentSudokuState);
+          insertCandidatesIntoTiles(allCandidates);
+        }
+      }
+      highlightCells(solutionNumber);
     }
   }
-}
+});
+
+//Efecto botones #tools
 
 // Función para manejar la introducción de candidatos manualmente en las celdas del tablero
 function handleManualCandidateInsertion(selectedCell, candidate) {
@@ -293,53 +311,6 @@ function insertCandidatesIntoTiles(allCandidates) {
   });
 }
 
-//region bulbPista
-// Obtener la herramienta de Pista (bulb)
-var bulbTool = document.querySelector(".tool:nth-child(3) img.pista-image");
-
-// Agregar un controlador de eventos de clic a la imagen de Pista (bulb)
-bulbTool.addEventListener("click", function () {
-  // Si la imagen ya está presionada, quitar la clase; de lo contrario, agregarla
-  bulbTool.classList.toggle("pressed");
-  // Agregar temporalmente la clase "bulb-pressed" solo si es la imagen de la herramienta de Pista (bulb)
-  bulbTool.classList.add("bulb-pressed");
-
-  // Esperar un tiempo corto y luego quitar la clase para desactivar la animación
-  setTimeout(function () {
-    bulbTool.classList.remove("bulb-pressed");
-  }, 200); // Ajusta el tiempo según la duración de tu animación CSS
-
-  if (selectedCell) {
-    const { row, col } = selectedCell;
-    const tile = document.getElementById(`${row}-${col}`);
-    if (
-      tile &&
-      !tile.classList.contains("user-input") &&
-      !tile.classList.contains("tile-start")
-    ) {
-      // Limpiar el contenido de la celda
-      tile.innerHTML = "";
-
-      // Verificar si el número de la solución en las coordenadas de la celda seleccionada es diferente de 0
-      const solutionNumber = solution[row][col];
-      if (solutionNumber !== 0) {
-        // Agregar el número directamente al div principal de la celda
-        tile.innerText = solutionNumber;
-        tile.classList.add("user-input"); // Marcar como número agregado por pista
-        tile.classList.add("pista");
-        numberCount[solutionNumber - 1]++;
-        // Recalcular los candidatos si pencilPressed está en true
-        currentSudokuState[row][col] = solutionNumber;
-        if (pencilPressed) {
-          const allCandidates = getAllCandidates(currentSudokuState);
-          insertCandidatesIntoTiles(allCandidates);
-        }
-      }
-      highlightCells(solutionNumber);
-    }
-  }
-});
-
 // Función para reiniciar los contadores de los números
 function resetNumberCounters() {
   numberCount = new Array(9).fill(0);
@@ -420,6 +391,8 @@ function setGame(predefinedPuzzle, predefinedSolution) {
     nestedPuzzle = predefinedPuzzle;
     nestedSolution = predefinedSolution;
     currentSudokuState = JSON.parse(JSON.stringify(nestedPuzzle));
+    initialRemainingNumbers = calculateInitialRemainingNumbers(nestedPuzzle);
+    createInitialRemainingDivs();
   } else {
     // Generar un nuevo sudoku usando sudoku-gen con la dificultad seleccionada
     const { puzzle: originalPuzzle, solution: solvedPuzzle } =
@@ -737,7 +710,7 @@ function selectTile(event, digit) {
 
           if (checkSolution()) {
             stopTimer();
-            showCongratulations();
+            showCongratulations(errors);
           }
         } else {
           errors += 1;
@@ -813,7 +786,8 @@ function clearHighlightsCandidates() {
   });
 }
 // region Congratulations
-function showCongratulations() {
+function showCongratulations(errors) {
+  pencilPressed = false;
   // Obtener una referencia al contenedor del tablero
   const boardContainer = document.getElementById("board");
 
@@ -829,7 +803,32 @@ function showCongratulations() {
   congratulationsBox.id = "congratulations-message";
   dialogContainer.appendChild(congratulationsBox);
 
-  pencilPressed = false;
+  // Crear div para las estrellas
+  const starsContainer = document.createElement("div");
+  starsContainer.classList.add("stars-container");
+  congratulationsBox.appendChild(starsContainer);
+
+  // Añadir las imágenes de las estrellas
+  for (let i = 0; i < 3; i++) {
+    const starImage = document.createElement("img");
+    starImage.src = "./assets/star-empty.png"; // Añade la ruta correcta a la imagen de estrella vacía
+    starImage.classList.add("star");
+    starsContainer.appendChild(starImage);
+  }
+
+  // Modificar las estrellas según los errores
+  const stars = starsContainer.querySelectorAll(".star");
+
+  if (errors === 0) {
+    stars.forEach((star) => {
+      star.src = "./assets/star.png"; // Añade la ruta correcta a la imagen de estrella llena
+    });
+  } else if (errors === 1) {
+    stars[0].src = "./assets/star.png"; // Llena la primera estrella
+    stars[1].src = "./assets/star.png"; // Llena la segunda estrella
+  } else if (errors === 2) {
+    stars[0].src = "./assets/star.png"; // Llena la primera estrella
+  }
 
   // Crear un mensaje de felicitación
   const congratulationsText = document.createElement("div");
@@ -854,6 +853,7 @@ function showCongratulations() {
   // Agregar la ventana de felicitación al contenedor del tablero
   boardContainer.appendChild(congratulationsBox);
 }
+
 //region GameOver
 function gameOver() {
   // Obtener una referencia al contenedor del tablero
@@ -1007,23 +1007,6 @@ function clearGame() {
 const digitButtons = document.querySelectorAll("#digits > div");
 digitButtons.forEach((button) => {
   button.addEventListener("click", selectDigit);
-});
-
-//Efecto botones #tools
-document.querySelectorAll(".tool img").forEach((image) => {
-  image.addEventListener("click", () => {
-    // Si la imagen ya está presionada, quitar la clase; de lo contrario, agregarla
-    image.classList.toggle("pressed");
-    // Agregar temporalmente la clase "bulb-pressed" solo si es la imagen de la herramienta de Pista (bulb)
-    if (image.classList.contains("pista-image")) {
-      // Agregar temporalmente una clase para activar la animación CSS
-      image.classList.add("bulb-pressed");
-      // Esperar un tiempo corto y luego quitar la clase para desactivar la animación
-      setTimeout(function () {
-        image.classList.remove("bulb-pressed");
-      }, 200); // Ajusta el tiempo según la duración de tu animación CSS
-    }
-  });
 });
 
 // Variable para almacenar el dígito seleccionado anteriormente
