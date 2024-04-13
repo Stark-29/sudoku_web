@@ -717,6 +717,21 @@ function selectTile(event, digit) {
           document.getElementById(
             "errors"
           ).innerText = `Mistakes: ${errors}/${totalMistakes}`;
+          tile.classList.add("shake-animation");
+          // Cambiar el color de fondo de la celda incorrecta a rojo
+          tile.style.backgroundColor = "red";
+
+          // Hacer que la celda parpadee con un efecto de transición de color rojo a su color original
+          setTimeout(() => {
+            tile.style.transition = "background-color 0.3s";
+            tile.style.backgroundColor = ""; // Restablecer el color de fondo
+          }, 300);
+
+          // Eliminar la clase de animación de sacudida después de un breve período
+          setTimeout(() => {
+            tile.classList.remove("shake-animation");
+          }, 500);
+
           if (errors >= totalMistakes) {
             stopTimer();
             gameOver();
@@ -864,8 +879,8 @@ function showCongratulations(errors) {
   restartButton.textContent = "Replay Game";
   restartButton.classList.add("restart-button");
   restartButton.addEventListener("click", () => {
-    document.getElementById("timer").innerText = "00:00"; // Reiniciar el temporizador
-    stopTimer(); // Detener el temporizador si está en marcha
+    document.getElementById("timer").innerText = "00:00";
+    stopTimer();
     clearHighlights();
     replayGame(nestedPuzzle, nestedSolution); // Volver a cargar el mismo sudoku
     congratulationsBox.remove(); // Ocultar ventana de diálogo
