@@ -821,19 +821,28 @@ function showCongratulations(errors) {
 
   if (errors === 0) {
     stars.forEach((star) => {
-      star.src = "./assets/star.png"; // Añade la ruta correcta a la imagen de estrella llena
+      star.src = "./assets/star.png";
     });
   } else if (errors === 1) {
-    stars[0].src = "./assets/star.png"; // Llena la primera estrella
-    stars[1].src = "./assets/star.png"; // Llena la segunda estrella
+    stars[0].src = "./assets/star.png";
+    stars[1].src = "./assets/star.png";
   } else if (errors === 2) {
-    stars[0].src = "./assets/star.png"; // Llena la primera estrella
+    stars[0].src = "./assets/star.png";
   }
 
   // Crear un mensaje de felicitación
   const congratulationsText = document.createElement("div");
   const elapsedTime = document.getElementById("timer").innerText; // Obtener el tiempo del temporizador
-  congratulationsText.innerHTML = `¡Felicidades!<br>Has completado el sudoku en ${elapsedTime}`;
+  congratulationsText.innerHTML = `
+    <div class="congratulations-title">¡Congratulations!</div>
+    <div class="congratulations-details">
+<p><span class="label">Time:</span> ${elapsedTime}</p>
+  <p><span class="label">Difficulty:</span> ${
+    difficulty.charAt(0).toUpperCase() + difficulty.slice(1)
+  }</p>
+  <p><span class="label">Mistakes:</span> ${errors}/3</p>
+    </div>
+  `;
   congratulationsText.classList.add("congratulations-text");
   congratulationsBox.appendChild(congratulationsText);
 
@@ -849,6 +858,20 @@ function showCongratulations(errors) {
     dialogContainer.remove();
   });
   congratulationsBox.appendChild(newGameButton);
+
+  // Crear un botón de reinicio
+  const restartButton = document.createElement("button");
+  restartButton.textContent = "Replay Game";
+  restartButton.classList.add("restart-button");
+  restartButton.addEventListener("click", () => {
+    document.getElementById("timer").innerText = "00:00"; // Reiniciar el temporizador
+    stopTimer(); // Detener el temporizador si está en marcha
+    clearHighlights();
+    replayGame(nestedPuzzle, nestedSolution); // Volver a cargar el mismo sudoku
+    congratulationsBox.remove(); // Ocultar ventana de diálogo
+    dialogContainer.remove();
+  });
+  congratulationsBox.appendChild(restartButton);
 
   // Agregar la ventana de felicitación al contenedor del tablero
   boardContainer.appendChild(congratulationsBox);
@@ -897,9 +920,30 @@ function gameOver() {
   // Agregar el dialogBox al dialogContainer
   dialogContainer.appendChild(dialogBox);
 
+  // Crear div para las imagenes gameOver
+  const overContainer = document.createElement("div");
+  overContainer.classList.add("over-container");
+  dialogBox.appendChild(overContainer);
+
+  // Añadir las imágenes de gameOver
+  for (let i = 0; i < 3; i++) {
+    const overImage = document.createElement("img");
+    overImage.src = "./assets/game-over2.png"; // Añade la ruta correcta a la imagen de estrella vacía
+    overImage.classList.add("over");
+    overContainer.appendChild(overImage);
+  }
+  // Modificar las estrellas según los errores
+  const gameOverImg = overContainer.querySelectorAll(".over");
+  gameOverImg.forEach((ggOver) => {
+    ggOver.src = "./assets/game-over2.png";
+  });
+
   // Crear un elemento para mostrar "GAME OVER"
   const gameOverText = document.createElement("div");
-  gameOverText.textContent = "GAME OVER";
+  gameOverText.innerHTML = `
+    <div class="gameOver-title">GAME OVER</div>
+  <p>You can start a new game or replay the same game</p>
+  `;
   gameOverText.classList.add("game-over-text");
   dialogBox.appendChild(gameOverText);
 
@@ -919,11 +963,10 @@ function gameOver() {
 
   // Crear un botón de reinicio
   const restartButton = document.createElement("button");
-  restartButton.textContent = "Restart";
+  restartButton.textContent = "Replay Game";
   restartButton.classList.add("restart-button");
   restartButton.addEventListener("click", () => {
-    //restartGame();
-    //document.getElementById("timer").innerText = "00:00"; // Reiniciar el temporizador
+    document.getElementById("timer").innerText = "00:00"; // Reiniciar el temporizador
     stopTimer(); // Detener el temporizador si está en marcha
     clearHighlights();
     replayGame(nestedPuzzle, nestedSolution); // Volver a cargar el mismo sudoku

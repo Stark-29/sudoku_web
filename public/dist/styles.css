@@ -19,7 +19,7 @@ p {
 
 span {
   font-size: 12px;
-  color: #aaaaaa; /* Elimina el margen exterior */
+  color: #aaaaaa;
 }
 
 /* Estilos del modal */
@@ -71,6 +71,21 @@ span {
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
   z-index: 2;
   width: 180px;
+}
+
+.stars-container {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px; /* Espacio inferior para separar las estrellas del texto */
+}
+
+.star {
+  width: 30px; /* Ajusta el tamaño de las estrellas según tus necesidades */
+  height: auto; /* Mantener la proporción */
+}
+.star:nth-child(2) {
+  position: relative;
+  top: -15px;
 }
 
 .congratulations-text,
@@ -184,8 +199,8 @@ span {
   width: 41.22px;
   height: 41.22px;
   display: grid;
-  grid-template-columns: repeat(3, 1fr); /* Tres columnas automáticas */
-  grid-template-rows: repeat(3, 1fr); /* Altura automática de las filas */
+  grid-template-columns: repeat(3, 13.74px); /* Tres columnas automáticas */
+  grid-template-rows: repeat(3, 13.74px); /* Altura automática de las filas */
 }
 
 .candidate {
@@ -222,6 +237,7 @@ span {
   line-height: normal;
   cursor: pointer; /* Cambiar cursor al pasar por encima */
   margin-top: 10px;
+  /*background-color: rgb(43 48 55);*/
 }
 
 .number:hover {
@@ -330,6 +346,7 @@ span {
   width: 3px;
   height: 100%;
   background-color: rgb(0, 0, 0);
+  z-index: 1;
 }
 
 .horizontal-grid {
