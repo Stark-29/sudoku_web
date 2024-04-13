@@ -16,6 +16,8 @@ var solution;
 var totalMistakes = 3; // Definir totalMistakes en el alcance global
 let numberCount = new Array(9).fill(0); //Contador numeros tablero
 let difficulty = "easy";
+let timerInterval; // Variable global para almacenar el intervalo del temporizador
+let startTime; // Variable para almacenar el tiempo de inicio del juego
 
 // Función para obtener los candidatos de todas las celdas vacías en un tablero de sudoku
 var pencilTool = document.querySelector(".tool:first-child img");
@@ -116,8 +118,7 @@ bulbTool.addEventListener("click", function () {
   }
 });
 
-//Efecto botones #tools
-
+// region LapizManual
 // Función para manejar la introducción de candidatos manualmente en las celdas del tablero
 function handleManualCandidateInsertion(selectedCell, candidate) {
   const { row, col } = selectedCell;
@@ -183,7 +184,7 @@ function handleManualCandidateInsertion(selectedCell, candidate) {
   }
 }
 
-// region CANDIDATES
+// region Obtener CANDIDATES
 // Función para obtener los candidatos de todas las celdas vacías en un tablero de sudoku
 function getAllCandidates(board) {
   const candidates = [];
@@ -316,7 +317,7 @@ function resetNumberCounters() {
   numberCount = new Array(9).fill(0);
 }
 
-//region Remainings
+//region RemainingDivs
 // Función para crear los divs de remaining
 function createInitialRemainingDivs() {
   const remainingContainer = document.getElementById("remaining-container");
@@ -518,7 +519,7 @@ difficultyButtons.forEach((button) => {
 });
 
 // Mostrar el modal al cargar la página
-window.addEventListener("DOMContentLoaded", (event) => {
+window.addEventListener("DOMContentLoaded", () => {
   document.getElementById("start-modal").style.display = "block";
   document.getElementById("timer").innerText = "00:00";
   stopTimer();
@@ -553,8 +554,6 @@ document.addEventListener("keydown", (event) => {
             return; // No hacer nada si el número ya se ha colocado 9 veces
           }
           // Llamar a selectTile con el número presionado
-          console.log("el digito es: ", digit);
-          console.log("Llamando a selectTile desde el evento de teclado");
           selectTile(null, digit);
         }
       }
@@ -562,7 +561,7 @@ document.addEventListener("keydown", (event) => {
 });
 
 // Función para mover la selección por el tablero
-function moveSelection(rowOffset, colOffset, selectedTile) {
+function moveSelection(rowOffset, colOffset) {
   const currentRow = selectedCell.row;
   const currentCol = selectedCell.col;
   const newRow = Math.max(0, Math.min(8, currentRow + rowOffset)); // Limitar el movimiento dentro del tablero
@@ -647,14 +646,10 @@ function selectTile(event, digit) {
 
   // Verificar si hay un número seleccionado
   if (!isEmptyTile && digit) {
-    console.log("El primer if se ha ejecutado correctamente.");
-
     if (
       tileSelected.innerText === "" ||
       tileSelected.querySelectorAll(".candidate").length > 0
     ) {
-      console.log("El segundo if se ha ejecutado correctamente.");
-
       console.log("Valor de solution en la celda:", solution[r][c]);
       console.log(`El número seleccionado es ${digit}.`);
 
@@ -1083,23 +1078,6 @@ function disableNumberSelection(number) {
   if (numberElement) {
     numberElement.classList.add("unavailable");
     numberElement.removeEventListener("click", selectDigit); // Desactivar el evento de clic
-
-    // Contar cuántas veces se ha seleccionado el número
-    const selectedCount = numberCount[number - 1];
-
-    // DESACTIVAR TILE DEL NÚMERO SI SE HA SELECCIONADO 9 VECES
-    // Si se ha seleccionado el número 9 veces, hacer que el tile del número sea invisible
-    // if (selectedCount === 9) {
-    //   const tile = document.querySelector(`#board [data-number="${number}"]`);
-    //   if (tile) {
-    //     // tile.style.visibility = "hidden"; // Hacer que el elemento del DOM sea invisible
-    //     // tile.removeEventListener("click", selectTile); // Desactivar el evento de clic en el tile
-    //     // numberElement.removeEventListener("click", selectDigit);
-    //   } else {
-    //     console.log(`El tile para el número ${number} no se encontró.`);
-    //   }
-    // }
-
     // Deshabilitar la selección del número si se ha seleccionado 9 veces
   }
 }
@@ -1171,9 +1149,7 @@ function clearHighlights() {
   });
 }
 
-let timerInterval; // Variable global para almacenar el intervalo del temporizador
-let startTime; // Variable para almacenar el tiempo de inicio del juego
-
+// region Timer
 // Función para iniciar el temporizador
 function startTimer() {
   let elapsedTime = 0;
