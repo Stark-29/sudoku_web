@@ -8,17 +8,22 @@
     />
     <title>Sudoku</title>
     <link rel="stylesheet" href="./styles.css" type="text/css" />
+    <!-- Ícono para navegadores que soportan íconos en múltiples tamaños -->
+    <link rel="icon" sizes="16x16" href="./assets/2x16.png" />
+    <link rel="icon" sizes="32x32" href="./assets/2x32.png" />
+    <link rel="icon" sizes="48x48" href="./assets/2x48.png" />
   </head>
 
   <body>
     <div id="info-container">
-      <div id="errors">Mistakes: 0/3</div>
+      <div id="errors">Mistakes 0/3</div>
       <div id="difficulty"></div>
-      <div id="timer">00:00</div>
+      <div id="timer"></div>
+      <img id="pause-button" src="./assets/pause.png" alt="Pause" />
     </div>
 
     <!-- Modal de inicio del juego -->
-    <div id="start-modal" class="modal">
+    <div id="start-modal" class="modal" style="display: none">
       <div class="modal-content">
         <h2>SUDOKU</h2>
         <p>Choose a difficulty level:</p>

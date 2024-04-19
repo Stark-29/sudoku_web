@@ -276,7 +276,6 @@ function insertCandidatesIntoTiles(allCandidates) {
           }
         });
       } else {
-        console.log("se ejecuto el sida de que tiene user-input");
         tile.innerHTML = ""; // Limpiar el contenido existente del tile
         // Si no existe un grid-container o no tiene la clase user-modified, crear uno nuevo
         gridContainer = document.createElement("div");
@@ -400,6 +399,7 @@ function setGame(predefinedPuzzle, predefinedSolution) {
       getSudoku(difficulty);
 
     console.log("Sudoku generado:", originalPuzzle); // Mensaje de depuración para el sudoku generado
+
     nestedPuzzle = [];
     // Convierte el sudoku en formato de matriz para su uso en el juego
     for (let i = 0; i < 9; i++) {
@@ -513,17 +513,15 @@ difficultyButtons.forEach((button) => {
     difficulty = button.getAttribute("data-difficulty");
     // Llamar a setGame con la dificultad seleccionada
     setGame();
+    localStorage.removeItem("sudokuGameState");
     // Ocultar el modal después de seleccionar la dificultad
     document.getElementById("start-modal").style.display = "none";
+    document.getElementById("timer").innerText = "00:00";
+    document.getElementById("errors").innerText = "Mistakes: 0/3";
   });
 });
 
-// Mostrar el modal al cargar la página
-window.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("start-modal").style.display = "block";
-  document.getElementById("timer").innerText = "00:00";
-  stopTimer();
-});
+//Mostrar el modal al cargar la página
 
 // Agregar evento de teclado para seleccionar el número o moverse por el tablero
 document.addEventListener("keydown", (event) => {
@@ -625,7 +623,6 @@ function selectTile(event, digit) {
   let c = parseInt(coords[1]);
   // Almacenar la celda seleccionada
   selectedCell = { row: r, col: c };
-  console.log("R=", r, "C=", c);
 
   // Resaltar la celda seleccionada
   tileSelected = tile;
@@ -641,7 +638,7 @@ function selectTile(event, digit) {
     // Si la celda seleccionada tiene la clase tile-start o user-input, resaltar números iguales al número seleccionado
     const selectedNumber = digit || parseInt(tileSelected.innerText);
     highlightCells(selectedNumber);
-    highlightRelatedCells(r, c);
+    //highlightRelatedCells(r, c);
   }
 
   // Verificar si hay un número seleccionado
@@ -699,12 +696,14 @@ function selectTile(event, digit) {
             ).innerText = `Mistakes: ${errors}/${totalMistakes}`;
             if (errors >= totalMistakes) {
               stopTimer();
+              localStorage.removeItem("sudokuGameState");
               gameOver();
             }
           }
 
           if (checkSolution()) {
             stopTimer();
+            localStorage.removeItem("sudokuGameState");
             showCongratulations(errors);
           }
         } else {
@@ -729,6 +728,7 @@ function selectTile(event, digit) {
 
           if (errors >= totalMistakes) {
             stopTimer();
+            localStorage.removeItem("sudokuGameState");
             gameOver();
           }
         }
@@ -798,6 +798,7 @@ function clearHighlightsCandidates() {
 // region Congratulations
 function showCongratulations(errors) {
   pencilPressed = false;
+  IsOver = true;
   // Obtener una referencia al contenedor del tablero
   const boardContainer = document.getElementById("board");
 
@@ -863,7 +864,7 @@ function showCongratulations(errors) {
   newGameButton.addEventListener("click", () => {
     restartGame();
     document.getElementById("start-modal").style.display = "block"; // Mostrar modal de selección de dificultad
-    document.getElementById("timer").innerText = "00:00";
+    document.getElementById("timer").innerText = "";
     stopTimer();
     dialogContainer.remove();
   });
@@ -874,7 +875,7 @@ function showCongratulations(errors) {
   restartButton.textContent = "Replay Game";
   restartButton.classList.add("restart-button");
   restartButton.addEventListener("click", () => {
-    document.getElementById("timer").innerText = "00:00";
+    document.getElementById("timer").innerText = "";
     stopTimer();
     clearHighlights();
     replayGame(nestedPuzzle, nestedSolution); // Volver a cargar el mismo sudoku
@@ -963,8 +964,11 @@ function gameOver() {
   newGameButton.classList.add("new-game-button");
   newGameButton.addEventListener("click", () => {
     restartGame();
+    localStorage.removeItem("sudokuGameState");
     document.getElementById("start-modal").style.display = "block"; // Mostrar modal de selección de dificultad
-    document.getElementById("timer").innerText = "00:00";
+    document.getElementById("timer").innerText = "";
+    document.getElementById("errors").innerText = "";
+    document.getElementById("difficulty").innerText = "";
     stopTimer();
     dialogBox.remove(); // Ocultar ventana de diálogo
     dialogContainer.remove();
@@ -976,12 +980,12 @@ function gameOver() {
   restartButton.textContent = "Replay Game";
   restartButton.classList.add("restart-button");
   restartButton.addEventListener("click", () => {
-    document.getElementById("timer").innerText = "00:00"; // Reiniciar el temporizador
     stopTimer(); // Detener el temporizador si está en marcha
     clearHighlights();
     replayGame(nestedPuzzle, nestedSolution); // Volver a cargar el mismo sudoku
     dialogBox.remove(); // Ocultar ventana de diálogo
     dialogContainer.remove();
+    document.getElementById("timer").innerText = "00:00"; // Reiniciar el temporizador
   });
   dialogBox.appendChild(restartButton);
 
@@ -1152,19 +1156,33 @@ function clearHighlights() {
 // region Timer
 // Función para iniciar el temporizador
 function startTimer() {
-  let elapsedTime = 0;
-  startTime = Date.now(); // Obtener el tiempo actual en milisegundos
+  if (!timerInterval) {
+    // Comprobar si el temporizador ya está en marcha
+    let elapsedTime = 0;
+    let savedTime = localStorage.getItem("sudokuGameState")
+      ? JSON.parse(localStorage.getItem("sudokuGameState")).timer
+      : null;
 
-  // Actualizar el tiempo en el reloj cada segundo
-  timerInterval = setInterval(() => {
-    elapsedTime = Date.now() - startTime; // Calcular el tiempo transcurrido
-    updateTimer(elapsedTime); // Actualizar el tiempo en el reloj
-  }, 1000);
+    if (savedTime) {
+      const [minutes, seconds] = savedTime.split(":").map(Number);
+      elapsedTime = minutes * 60000 + seconds * 1000;
+    }
+
+    startTime = Date.now() - elapsedTime; // Ajustar el inicio basado en el tiempo guardado
+
+    // Actualizar el tiempo en el reloj cada segundo
+    timerInterval = setInterval(() => {
+      elapsedTime = Date.now() - startTime; // Calcular el tiempo transcurrido
+      updateTimer(elapsedTime); // Actualizar el tiempo en el reloj
+    }, 1000);
+  }
 }
 
 // Función para detener el temporizador
 function stopTimer() {
   clearInterval(timerInterval); // Detener el intervalo del temporizador
+  timerInterval = null; // Reiniciar la variable del intervalo
+  startTime = null; // Reiniciar la variable del tiempo de inicio
 }
 
 // Función para actualizar el tiempo en el reloj
@@ -1175,4 +1193,215 @@ function updateTimer(elapsedTime) {
     .toString()
     .padStart(2, "0")}`; // Formatear el tiempo como MM:SS
   document.getElementById("timer").innerText = formattedTime; // Actualizar el texto del reloj
+}
+
+//region DEL MALDITO SIDA
+window.addEventListener("beforeunload", () => {
+  console.log("beforeunload event triggered");
+
+  const board = document.querySelectorAll(".tile");
+  console.log("Board length:", board.length);
+
+  if (board.length > 0 && !IsOver) {
+    console.log("Saving game state...");
+    saveGameState();
+    console.log("Game state saved successfully.");
+  } else {
+    console.log("No need to save game state.");
+  }
+});
+
+// Mostrar el modal al cargar la página
+window.addEventListener("DOMContentLoaded", () => {
+  if (localStorage.getItem("sudokuGameState")) {
+    console.log("Game state found in localStorage. Loading game state...");
+    document.getElementById("start-modal").style.display = "none";
+    loadGameState();
+  } else {
+    // Mostrar el modal solo si gameOver es false
+    console.log("Game is not over or no game state found. Showing modal.");
+    document.getElementById("start-modal").style.display = "block";
+    document.getElementById("timer").innerText = "";
+    stopTimer();
+  }
+});
+
+function getTileType(cell) {
+  return cell.type === "tile-start" ? 0 : 1;
+}
+
+function saveGameState() {
+  console.log("Saving game state...");
+
+  // Crear una copia del estado actual con la información adicional de cada celda
+  const enrichedCurrentSudokuState = currentSudokuState.map((row, rowIndex) =>
+    row.map((cell, colIndex) => ({
+      value: cell,
+      type:
+        cell !== 0 &&
+        document
+          .getElementById(`${rowIndex}-${colIndex}`)
+          .classList.contains("user-input")
+          ? "user-input"
+          : "tile-start",
+    }))
+  );
+
+  // Crear un nuevo array con valores de 0 y 1
+  const simplifiedState = enrichedCurrentSudokuState.map((row) =>
+    row.map((cell) => getTileType(cell))
+  );
+
+  // Crear un nuevo array solo con los valores de 'value'
+  const simpleCurrentSudokuState = enrichedCurrentSudokuState.map((row) =>
+    row.map((cell) => cell.value)
+  );
+
+  // Obtener la información del info-container
+  const difficulty = document.getElementById("difficulty").innerText;
+  const timer = document.getElementById("timer").innerText;
+
+  const gameState = JSON.stringify({
+    currentSudokuState: simpleCurrentSudokuState,
+    simplifiedState: simplifiedState,
+    nestedSolution: nestedSolution,
+    errors: errors,
+    difficulty: difficulty,
+    timer: timer,
+  });
+
+  console.log("Saving game state to localStorage:", gameState);
+  localStorage.setItem("sudokuGameState", gameState);
+}
+
+function loadGameState() {
+  console.log("Loading game state...");
+
+  const gameState = localStorage.getItem("sudokuGameState");
+
+  if (gameState) {
+    console.log("Game state found:", gameState);
+
+    const parsedGameState = JSON.parse(gameState);
+
+    if (
+      parsedGameState.currentSudokuState &&
+      parsedGameState.nestedSolution &&
+      parsedGameState.simplifiedState &&
+      parsedGameState.errors !== undefined &&
+      parsedGameState.difficulty &&
+      parsedGameState.timer
+    ) {
+      currentSudokuState = parsedGameState.currentSudokuState;
+      nestedSolution = parsedGameState.nestedSolution;
+
+      // Llamar a setGame con los datos cargados
+      setGameForSaveAndLoad(currentSudokuState, nestedSolution, true);
+    } else {
+      console.error("Invalid game state format.");
+    }
+  } else {
+    console.log("No game state found in localStorage.");
+  }
+}
+
+function setGameForSaveAndLoad(predefinedPuzzle, predefinedSolution) {
+  // Reiniciar los contadores de los números
+  numSelected = null;
+  clearGame();
+  startTimer();
+  resetNumberCounters();
+
+  // Utilizar los valores predefinidos si se proporcionan
+  nestedPuzzle = predefinedPuzzle;
+  nestedSolution = predefinedSolution;
+
+  // Obtener el estado guardado del juego desde localStorage
+  const gameState = localStorage.getItem("sudokuGameState");
+  const parsedGameState = JSON.parse(gameState);
+
+  // Asignar el estado actual del juego desde el localStorage a currentSudokuState
+  currentSudokuState = parsedGameState.currentSudokuState;
+  console.log(parsedGameState.errors);
+  if (parsedGameState.errors > 0) {
+    errors = parsedGameState.errors;
+  }
+
+  // Obtener el estado simplificado del juego guardado en localStorage
+  const simplifiedState = parsedGameState.simplifiedState;
+
+  // Actualizar el reloj con el valor almacenado
+  const savedTime = parsedGameState.timer;
+  if (savedTime) {
+    updateTimer(parseTimeToMilliseconds(savedTime));
+  }
+
+  // Reiniciar el temporizador con el tiempo guardado
+  startTimer(parseTimeToMilliseconds(savedTime));
+
+  // Actualizar los divs de los números restantes
+  initialRemainingNumbers = calculateInitialRemainingNumbers(nestedPuzzle);
+  createInitialRemainingDivs();
+  // Calcular los números restantes inicialmente
+  calculateInitialRemainingNumbers(nestedPuzzle);
+
+  // Digits 1-9
+  for (let i = 1; i <= 9; i++) {
+    let number = document.createElement("div");
+    number.innerText = i;
+    number.dataset.number = i; // Añadir el atributo de datos
+    number.addEventListener("click", selectDigit);
+    number.classList.add("number");
+    document.getElementById("digits").appendChild(number);
+  }
+
+  // Board 9x9
+  for (let r = 0; r < 9; r++) {
+    for (let c = 0; c < 9; c++) {
+      let tile = document.createElement("div");
+      tile.id = r.toString() + "-" + c.toString();
+
+      // Obtener el valor de currentSudokuState y el tipo de la celda simplificada
+      const value = currentSudokuState[r][c];
+      const type = simplifiedState[r][c] === 0 ? "tile-start" : "user-input";
+
+      // Añadir clases y escuchar eventos según el tipo de celda
+      if (value !== 0) {
+        tile.innerText = value;
+        tile.classList.add(type);
+        // Incrementar el conteo del número colocado en el tablero inicial
+        numberCount[value - 1]++;
+        tile.addEventListener("click", selectTile);
+      } else {
+        tile.addEventListener("click", selectTile);
+      }
+
+      // Añadir clases para las líneas y cuadrículas del tablero
+      if (r == 2 || r == 5) {
+        tile.classList.add("horizontal-line");
+      }
+      if (r == 0 || r == 1 || r == 3 || r == 4 || r == 6 || r == 7) {
+        tile.classList.add("horizontal-grid");
+      }
+      if (c == 2 || c == 5) {
+        tile.classList.add("vertical-line");
+      }
+      if (c == 0 || c == 1 || c == 3 || c == 4 || c == 6 || c == 7) {
+        tile.classList.add("vertical-grid");
+      }
+
+      tile.classList.add("tile");
+      document.getElementById("board").append(tile);
+    }
+  }
+  solution = nestedSolution;
+
+  document.getElementById("errors").innerText = `Mistakes: ${errors}/3`;
+  document.getElementById("difficulty").innerText = parsedGameState.difficulty;
+  // document.getElementById("timer").innerText = parsedGameState.timer;
+}
+
+function parseTimeToMilliseconds(timeString) {
+  const [minutes, seconds] = timeString.split(":");
+  return parseInt(minutes, 10) * 60000 + parseInt(seconds, 10) * 1000;
 }
