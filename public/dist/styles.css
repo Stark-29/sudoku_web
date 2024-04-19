@@ -205,10 +205,18 @@ span {
 
 #difficulty {
   text-align: center;
+  margin-left: 20px;
 }
 
 #timer {
   text-align: right;
+  margin-right: 3px;
+}
+
+#pause-button {
+  height: 17px;
+  width: 16px;
+  cursor: pointer;
 }
 
 #board {
