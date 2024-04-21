@@ -4,11 +4,23 @@ body {
   background-color: #222; /* Color de fondo típico del modo oscuro */
   color: #ffffff; /* Color del texto */
 }
+
+@keyframes blink {
+  0%,
+  100% {
+    filter: brightness(1.4);
+  }
+  50% {
+    filter: brightness(1);
+  }
+}
+
 h2 {
-  font-size: 24px; /* Tamaño de fuente */
+  font-size: 30px; /* Tamaño de fuente */
   font-weight: bold; /* Peso de la fuente */
   margin: 0; /* Elimina el margen exterior */
-  color: #fff;
+  color: #2f7bda;
+  animation: blink 1.5s infinite;
 }
 
 /* Estilo para p */
@@ -24,11 +36,7 @@ span {
 
 /* Estilos del modal */
 .modal {
-  display: flex;
-  align-items: center; /* Centrar verticalmente */
-  justify-content: center; /* Centrar horizontalmente */
   position: fixed;
-  z-index: 1;
   left: 0;
   top: 0; /* Puedes cambiar este valor al 50% si deseas */
   width: 100%;
@@ -37,6 +45,7 @@ span {
   background-color: rgba(0, 0, 0, 0.7);
   z-index: 2;
 }
+
 .modal-content {
   background-color: #2f2f2f;
   color: #ffffff; /* Color del texto */
@@ -45,6 +54,10 @@ span {
   border-radius: 10px;
   width: 350px; /* Ajustado al nuevo ancho del tablero */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+#pauseModal {
+  background-color: rgba(0, 0, 0, 0.95);
 }
 
 .dialog-container {
@@ -104,10 +117,11 @@ span {
 .congratulations-title,
 .gameOver-title {
   font-family: "Georgia", serif;
-  font-size: 28px; /* Tamaño grande para el título */
+  font-size: 26px; /* Tamaño grande para el título */
   text-align: center; /* Centrar el texto */
   margin-bottom: 12px; /* Espacio inferior */
-  color: #fff;
+  color: #ffffff;
+  font-weight: bold;
 }
 
 .label {
@@ -131,7 +145,7 @@ span {
 }
 
 .game-over-text {
-  font-size: 18px; /* Tamaño de fuente reducido */
+  font-size: 16px; /* Tamaño de fuente reducido */
   margin-bottom: 10px;
 }
 
@@ -140,6 +154,25 @@ span {
   height: auto; /* Mantener la proporción */
   margin: 0 5px; /* Espaciado entre las estrellas */
   animation: starTilt 1s infinite alternate;
+}
+
+#resumeGameButton {
+  display: block;
+  margin-top: 20px;
+  align-items: center;
+  background-color: rgb(66, 109, 172);
+  color: #ffffff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 18px;
+  width: fit-content; /* Ajustar el ancho al contenido */
+  margin: auto; /* Centrar horizontalmente */
+}
+
+#resumeGameButton:hover {
+  background-color: rgb(66, 154, 218);
 }
 
 .new-game-button,
@@ -217,6 +250,11 @@ span {
   height: 17px;
   width: 16px;
   cursor: pointer;
+  transition: transform 0.15s linear; /* Transición para el efecto de escala */
+}
+
+#pause-button:active {
+  transform: scale(0.7); /* Aumentar el tamaño del botón al hacer clic */
 }
 
 #board {
