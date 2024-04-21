@@ -513,11 +513,12 @@ difficultyButtons.forEach((button) => {
     difficulty = button.getAttribute("data-difficulty");
     // Llamar a setGame con la dificultad seleccionada
     setGame();
-    localStorage.removeItem("sudokuGameState");
+    localStorage.clear();
     // Ocultar el modal después de seleccionar la dificultad
     document.getElementById("start-modal").style.display = "none";
     document.getElementById("timer").innerText = "00:00";
     document.getElementById("errors").innerText = "Mistakes: 0/3";
+    document.getElementById("pause-button").style.display = "block";
   });
 });
 
@@ -572,6 +573,9 @@ function moveSelection(rowOffset, colOffset) {
       clearHighlightsCandidates();
       // Seleccionar nueva celda
       selectedCell = { row: newRow, col: newCol };
+      //Almacenar el valor de la celda en el localStorage
+      localStorage.setItem("selectedCell", JSON.stringify(selectedCell));
+
       tileSelected = newCell;
       newCell.classList.add("highlighted");
       // Verificar si la celda seleccionada tiene la clase tile-start o user-input
@@ -696,14 +700,14 @@ function selectTile(event, digit) {
             ).innerText = `Mistakes: ${errors}/${totalMistakes}`;
             if (errors >= totalMistakes) {
               stopTimer();
-              localStorage.removeItem("sudokuGameState");
+
               gameOver();
             }
           }
 
           if (checkSolution()) {
             stopTimer();
-            localStorage.removeItem("sudokuGameState");
+
             showCongratulations(errors);
           }
         } else {
@@ -728,7 +732,7 @@ function selectTile(event, digit) {
 
           if (errors >= totalMistakes) {
             stopTimer();
-            localStorage.removeItem("sudokuGameState");
+
             gameOver();
           }
         }
@@ -799,6 +803,9 @@ function clearHighlightsCandidates() {
 function showCongratulations(errors) {
   pencilPressed = false;
   IsOver = true;
+  localStorage.clear();
+  document.getElementById("pause-button").style.display = "none";
+
   // Obtener una referencia al contenedor del tablero
   const boardContainer = document.getElementById("board");
 
@@ -865,6 +872,7 @@ function showCongratulations(errors) {
     restartGame();
     document.getElementById("start-modal").style.display = "block"; // Mostrar modal de selección de dificultad
     document.getElementById("timer").innerText = "";
+    document.getElementById("pause-button").style.display = "none";
     stopTimer();
     dialogContainer.remove();
   });
@@ -881,6 +889,7 @@ function showCongratulations(errors) {
     replayGame(nestedPuzzle, nestedSolution); // Volver a cargar el mismo sudoku
     congratulationsBox.remove(); // Ocultar ventana de diálogo
     dialogContainer.remove();
+    document.getElementById("pause-button").style.display = "block";
   });
   congratulationsBox.appendChild(restartButton);
 
@@ -905,6 +914,8 @@ function gameOver() {
   const remainingNumbers = document.querySelectorAll(
     "#remaining-container > div"
   );
+  document.getElementById("pause-button").style.display = "none";
+  localStorage.clear();
 
   // Agregar la clase "unavailable" a cada número del div digits
   digitNumbers.forEach((number) => {
@@ -964,11 +975,11 @@ function gameOver() {
   newGameButton.classList.add("new-game-button");
   newGameButton.addEventListener("click", () => {
     restartGame();
-    localStorage.removeItem("sudokuGameState");
     document.getElementById("start-modal").style.display = "block"; // Mostrar modal de selección de dificultad
     document.getElementById("timer").innerText = "";
     document.getElementById("errors").innerText = "";
     document.getElementById("difficulty").innerText = "";
+    document.getElementById("pause-button").style.display = "none";
     stopTimer();
     dialogBox.remove(); // Ocultar ventana de diálogo
     dialogContainer.remove();
@@ -986,6 +997,7 @@ function gameOver() {
     dialogBox.remove(); // Ocultar ventana de diálogo
     dialogContainer.remove();
     document.getElementById("timer").innerText = "00:00"; // Reiniciar el temporizador
+    document.getElementById("pause-button").style.display = "block";
   });
   dialogBox.appendChild(restartButton);
 
@@ -1159,9 +1171,12 @@ function startTimer() {
   if (!timerInterval) {
     // Comprobar si el temporizador ya está en marcha
     let elapsedTime = 0;
-    let savedTime = localStorage.getItem("sudokuGameState")
-      ? JSON.parse(localStorage.getItem("sudokuGameState")).timer
-      : null;
+
+    let savedTime = localStorage.getItem("sudokuTimer");
+
+    if (savedTime === null) {
+      savedTime = "00:00"; // Valor predeterminado si no hay tiempo guardado
+    }
 
     if (savedTime) {
       const [minutes, seconds] = savedTime.split(":").map(Number);
@@ -1185,6 +1200,55 @@ function stopTimer() {
   startTime = null; // Reiniciar la variable del tiempo de inicio
 }
 
+function toggleTimer() {
+  // Verificar si ya existe un modal de pausa y eliminarlo si es necesario
+  const existingPauseModal = document.getElementById("pauseModal");
+  if (existingPauseModal) {
+    existingPauseModal.remove();
+  }
+
+  const pauseModal = document.createElement("div");
+  pauseModal.id = "pauseModal";
+  pauseModal.className = "modal";
+
+  const modalContent = document.createElement("div");
+  modalContent.className = "modal-content";
+
+  const modalTitle = document.createElement("h2");
+  modalTitle.innerText = "GAME PAUSED";
+
+  const modalMessage = document.createElement("p");
+  modalMessage.innerText =
+    "The game is currently paused, click the button to resume playing.";
+
+  const resumeGameButton = document.createElement("button");
+  resumeGameButton.id = "resumeGameButton";
+  resumeGameButton.innerText = "Resume Game";
+  resumeGameButton.addEventListener("click", () => {
+    pauseModal.style.display = "none"; // Ocultar el modal al reanudar el juego
+    startTimer(); // Reanudar el temporizador
+  });
+
+  pauseModal.appendChild(modalContent);
+  modalContent.appendChild(modalTitle);
+  modalContent.appendChild(modalMessage);
+  modalContent.appendChild(resumeGameButton);
+
+  document.body.appendChild(pauseModal);
+
+  pauseModal.style.display = "block";
+
+  // Detener el temporizador
+  if (timerInterval) {
+    stopTimer();
+  } else {
+    startTimer();
+  }
+}
+
+// Evento de clic para el botón de pausa
+document.getElementById("pause-button").addEventListener("click", toggleTimer);
+
 // Función para actualizar el tiempo en el reloj
 function updateTimer(elapsedTime) {
   const minutes = Math.floor(elapsedTime / 60000); // Calcular minutos
@@ -1193,6 +1257,12 @@ function updateTimer(elapsedTime) {
     .toString()
     .padStart(2, "0")}`; // Formatear el tiempo como MM:SS
   document.getElementById("timer").innerText = formattedTime; // Actualizar el texto del reloj
+  localStorage.setItem("sudokuTimer", formattedTime);
+}
+
+function parseTimeToMilliseconds(timeString) {
+  const [minutes, seconds] = timeString.split(":");
+  return parseInt(minutes, 10) * 60000 + parseInt(seconds, 10) * 1000;
 }
 
 //region DEL MALDITO SIDA
@@ -1222,6 +1292,7 @@ window.addEventListener("DOMContentLoaded", () => {
     console.log("Game is not over or no game state found. Showing modal.");
     document.getElementById("start-modal").style.display = "block";
     document.getElementById("timer").innerText = "";
+    document.getElementById("pause-button").style.display = "none";
     stopTimer();
   }
 });
@@ -1335,6 +1406,11 @@ function setGameForSaveAndLoad(predefinedPuzzle, predefinedSolution) {
   if (savedTime) {
     updateTimer(parseTimeToMilliseconds(savedTime));
   }
+  // Restaurar selectedCell desde localStorage si existe
+  const storedSelectedCell = localStorage.getItem("selectedCell");
+  if (storedSelectedCell) {
+    selectedCell = JSON.parse(storedSelectedCell);
+  }
 
   // Reiniciar el temporizador con el tiempo guardado
   startTimer(parseTimeToMilliseconds(savedTime));
@@ -1399,9 +1475,4 @@ function setGameForSaveAndLoad(predefinedPuzzle, predefinedSolution) {
   document.getElementById("errors").innerText = `Mistakes: ${errors}/3`;
   document.getElementById("difficulty").innerText = parsedGameState.difficulty;
   // document.getElementById("timer").innerText = parsedGameState.timer;
-}
-
-function parseTimeToMilliseconds(timeString) {
-  const [minutes, seconds] = timeString.split(":");
-  return parseInt(minutes, 10) * 60000 + parseInt(seconds, 10) * 1000;
 }
